@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @font-face {
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 500;
+            src: url(../fonts/Noto_Sans/static/NotoSans-Regular.ttf) format('truetype');
+        }
+        @font-face {
+            font-family: 'Noto Sans';
+            font-style: normal;
+            font-weight: 700;
+            src: url(../fonts/Noto_Sans/static/NotoSans-Bold.ttf) format('truetype');
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .payslip-container {
+            width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 1px solid #000;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .payslip-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payslip-section {
+            margin-bottom: 20px;
+        }
+
+        .separator {
+            border-bottom: 1px solid #000;
+            margin: 5px 0;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .section-titleV2 {
+            margin-bottom: 10px;
+            padding: 100%;
+            padding-left: 40px;
+            padding-top: 25px;
+        }
+
+        .section-title {
+            margin-bottom: 10px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table td {
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        .amount {
+            text-align: right;
+        }
+    </style>
+    <title>Electronic Employee Payslip</title>
+</head>
+<body>
+    <div style="position: absolute; top: 0; right: 0; text-align: right; margin-bottom: 10px;">
+        <img src="employeeDTR/templates/assets/img/logos/company_logo.jpg" alt="Company Logo" style="width: 180px; height: auto;">
+    </div>
+    <div class="payslip-container">
+        <div class="payslip-section">
+            <table class="table">
+                <tr>
+                    <td>Employee Name:</td>
+                    <td class="amount"><span class="bold">{{ PaySlip_Data.complete_name }}</span></td>
+                </tr>
+                <tr>
+                    <td>Pay Period:</td>
+                    <td class="amount"><span class="bold">{{ PaySlip_Data.period_start }}</span> to <span class="bold">{{ PaySlip_Data.period_end }}</span></td>
+                </tr>
+            </table>
+            <div class="separator"></div>
+        </div>
+
+        <div class="payslip-section">
+            <table class="table">
+                <tr>
+                    <td class="section-title bold">Basic Pay</td>
+                    <td class="amount bold">Php {{ PaySlip_Data.basic_pay }}</td>
+                </tr>
+                <div class="separator"></div>
+                {% if PaySlip_Data.addition_details %}
+                {% for addition in PaySlip_Data.addition_details %}
+                <tr>
+                    <td>{{ addition.name }}</td>
+                    <td class="amount">Php {{ addition.amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td class="bold">Total Benefits/Bonuses</td>
+                    <td class="amount bold">Php {{ PaySlip_Data.total_additions }}</td>
+                </tr>
+                {% endif %}
+            </table>
+            <div class="separator"></div>
+        </div>
+
+        <div class="payslip-section">
+            <table class="table">
+                <tr>
+                    <td class="section-title bold">GROSS PAY:</td>
+                    <td class="amount bold">Php {{ PaySlip_Data.gross_pay }}</td>
+                </tr>
+            </table>
+            <div class="separator"></div>
+        </div>
+
+        {% if PaySlip_Data.deduct == 'yes' %}
+        <div class="payslip-section">
+            <div class="section-titleV2 bold">LESS: DEDUCTIONS</div>
+            <table class="table">
+                {% for deduction in PaySlip_Data.deductions_details %}
+                <tr>
+                    <td>{{ deduction.name }}</td>
+                    <td class="amount">Php {{ deduction.amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td class="bold">Total Deductions</td>
+                    <td class="amount bold">Php {{ PaySlip_Data.total_deductions }}</td>
+                </tr>
+            </table>
+            <div class="separator"></div>
+        </div>
+        {% endif %}
+        <div class="payslip-section">
+            <table class="table">
+                <tr>
+                    <td class="bold">Net Pay</td>
+                    <td class="amount bold">Php {{ PaySlip_Data.net_pay }}</td>
+                </tr>
+            </table>
+            <div class="separator"></div>
+        </div>
+
+        <div class="payslip-section">
+            <table class="table">
+                <tr>
+                    <td class="bold" style="padding-top: 20px;">Received by:</td>
+                </tr>
+            </table>
+            <div class="separator"></div>
+        </div>
+    </div>
+</body>
+</html>

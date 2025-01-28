@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <style>
+
+      .custom-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .custom-container .col-md-6 {
+        text-align: center;
+      }
+
+      .custom-table {
+        width: 100%; /* Set table width to 100% */
+        margin: auto; /* Center the table horizontally */
+        border-collapse: collapse;
+      }
+
+      .custom-table td {
+        border: 1px solid #a9a9a9; /* Add borders to cells */
+        padding: 6px; /* Add padding to cells */
+        text-align: left; /* Center align text */
+        vertical-align: middle;
+        width: 25%; /* Set width of each cell to 25% */
+      }
+
+      .custom-header {
+        background-color: #f2f2f2;
+      }
+
+      .custom-data {
+        background-color: #fff;
+        text-transform: uppercase ;
+      }
+
+      .custom-data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .custom-data-table th,
+      .custom-data-table td {
+        border: 1px solid #a9a9a9;
+        padding: 6px;
+        text-align: center;
+        vertical-align: middle;
+        width: 20%;
+      }
+
+      .custom-data-table th {
+        font-weight: bold;
+      }
+
+      .custom-data-table tbody tr:nth-child(even) td {
+        background-color: #f2f2f2; 
+      }
+
+
+      .custom-hours-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .custom-hours-table th,
+      .custom-hours-table td {
+        border: 1px solid #a9a9a9;
+        padding: 6px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .custom-hours-table th {
+        font-weight: bold;
+      }
+
+      .custom-hours-table tbody tr:nth-child(even) td {
+        background-color: #f2f2f2; 
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="container custom-container">
+      <div class="row">
+        <div class="col-md-6 mx-auto">
+          <h1>
+            Electronic Daily Attendance Record and Manual Daily Attendance Record
+          </h1>
+        </div>
+      </div>
+    </div>
+    <main >
+      <table class="custom-table">
+        <tbody>
+          <tr>
+            <td class="custom-header">Employee</td>
+            <td class="custom-data">{{employee_name}}</td>
+            <td class="custom-header">Position</td>
+            <td class="custom-data">{{position}}</td>
+          </tr>
+          <tr>
+            <td class="custom-header">Office/Department</td>
+            <td class="custom-data">{{department}}</td>
+            <td class="custom-header">Period</td>
+            <td class="custom-data">{{period}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:20px" >
+        <table class="custom-hours-table"  >
+           <thead>
+            <tr>
+              <th class="custom-header">Week No.</th>
+              <th class="custom-header">Date Range</th>
+              <th class="custom-header">Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for hours in weekly_hours %}
+            <tr>
+              <td>{{hours.week_no}}</td>
+              <td>{{hours.date_range}}</td>
+              <td>{{hours.total_hours}}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <th class="custom-header"
+              >
+              Grand Total Hours
+              </th>
+              <td
+              >
+              </td>
+              <th class="custom-header"
+              >
+              {{grand_total_hours}} Hours
+              </th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:30px">
+      <table class="custom-data-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Mode</th>            
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in dtr_data %}
+          <tr>
+            <td>{{data.day}}</td>
+            <td>{{data.date}}</td>
+            <td>{{data.time}}</td>
+            <td>{{data.mode}}</td>
+            <td class="align-middle text-sm">
+              {{data.remarks}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+        {% comment %} <div class="table-responsive p-0">
+          <table
+            class="table table-striped table-bordered table-hover align-items-left mb-0 mt-4"
+          >
+            <thead class="align-items-left">
+              <tr>
+                <th
+                  class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                >
+                  Day
+                </th>
+                <th
+                  class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                >
+                  Date
+                </th>
+                <th
+                  class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                >
+                  Time
+                </th>
+                <th
+                  class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                >
+                  Mode
+                </th>
+                <th
+                  class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                >
+                  Remarks
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in dtr_data %}
+                <tr>
+                  <td class="align-middle text-sm mb-0">
+                    {{data.day}}
+                  </td>
+                  <td class="align-middle text-sm mb-0">
+                    {{data.date}}
+                  </td>
+                  <td class="align-middle text-sm mb-0">
+                    {{data.time}}
+                  </td>
+                  <td class="align-middle text-sm mb-0">
+                    {% if data.status == "C/In" %}
+                      In
+                    {% else %}
+                      Out
+                    {% endif %}
+                  </td>
+                  <td class="align-middle text-sm">
+                    {% if data.status == "C/In" %}
+                      <span class="badge badge-sm bg-gradient-success">
+                        CHECK-IN
+                      </span>
+                    {% else %}
+                      <span class="badge badge-sm bg-gradient-danger">
+                        CHECK-OUT
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div> {% endcomment %}
+      {% comment %} </div> {% endcomment %}
+    </main>
+  </body>
+</html>
