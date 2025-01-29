@@ -12,8 +12,20 @@ cd .\DTRPAYROLL\
 #install the requirements.txt
 pip install -r requirements.txt
 
-#create localDB  table in MYSQL using xampp 
+#follow this https://github.com/fananimi/pyzk
+pip install -U pyzk
+
+pip install pymysql
+
+#create localDB  table in MYSQL using xampp
 and using this as the table name "dtr_payroll"
+
+#
+
+#make migrations
+python manage.py makemigrations
+
+python manage.py makemigrations employeeDTR
 
 #migrate
 python manage.py migrate

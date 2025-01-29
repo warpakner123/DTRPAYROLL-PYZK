@@ -47,3 +47,11 @@ coverage.xml
 # Static files
 staticfiles/
 static/
+/.env
+/.venv
+/env
+/DTRPAYROLL/__pycache__
+/DTRPAYROLL/api/__pycache__
+/DTRPAYROLL/config/__pycache__
+/DTRPAYROLL/employeeDTR/__pycache__
+/DTRPAYROLL/employeeDTR/migrations/

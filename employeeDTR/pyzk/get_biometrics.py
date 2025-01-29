@@ -36,7 +36,7 @@ def capture_biometric():
 
                     print('employee_ID:',employee.employee_id)
                     print('department:',employee.department)
-
+ 
                             # Get the most recent attendance record for today
                     today = timezone.now().date()
                     print('TODAY:', today)
@@ -46,7 +46,21 @@ def capture_biometric():
                         print('attendance:', emp_attendance)
                         print('attendance + 5 mins:', emp_attendance.datetime + timedelta(minutes=5))
                         print('attendance.timestamp:', attendance.timestamp)
-                        inOut = 'C/Out' if emp_attendance.datetime + timedelta(minutes=5) < attendance.timestamp else 'C/In' 
+                        last_timestamp=emp_attendance.datetime
+                        five_min_after_last=last_timestamp+timedelta(minutes=5)
+                        current_timestamp=timezone.now()
+                        
+                        #inOut = 'C/Out' if emp_attendance.datetime + timedelta(minutes=5) < attendance.timestamp else 'C/In' 
+                        
+                        #if emp_attendance.datetime + timedelta(minutes=5) < current_timestamp:
+                        #    inOut = 'C/Out' if emp_attendance.status == 'C/In' else 'C/Out' # 'C/In' Toggle between Cin Cout
+                        #    print(f"Next Status: {inOut}")
+                        if current_timestamp >= five_min_after_last:
+                            inOut='C/Out' if emp_attendance.status == 'C/In' else 'C/In'
+                        else:
+                            inOut = emp_attendance.status
+                        print(f"Next Status: {inOut}")
+                        
                     else:
                         print(f"No attendance record found for employee with ID {user_id} on {today}")
          
