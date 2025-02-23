@@ -1,6 +1,7 @@
 from zk import ZK, const
 
-def clear_device_user():
+
+def get_users():
     conn = None
     # create ZK instance
     zk = ZK('192.168.1.201', port=4370, timeout=5, password=0, force_udp=True, ommit_ping=False, verbose=True)
@@ -23,4 +24,4 @@ def clear_device_user():
             conn.disconnect()
 
 if __name__ == "__main__":
-    clear_device_user()
+    get_users()

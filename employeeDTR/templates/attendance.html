@@ -338,11 +338,20 @@
                     <button
                       type="submit"
                       name="live_capture"
-                      class="btn btn-primary btn-lg ml-3"
+                      class="btn btn-success btn-lg ml-3"
                     >
                       Live Capture
                     </button>
                 </div>
+                <div class="d-flex align-items-center">
+                  <button
+                    type="submit"
+                    name="restart_device"
+                    class="btn btn-danger btn-lg ml-3"
+                  >
+                    Restart Device
+                  </button>
+              </div>
               </form>
             </div>
             <div class="col-md-auto">
@@ -461,6 +470,9 @@
                                       <p class="text-xs text-secondary mb-0">
                                           {{dtr.employee.email}}
                                       </p>
+                                      <p class="text-xs text-secondary mb-0">
+                                        Emp ID: {{dtr.employee.employee_id}}
+                                    </p>
                                   </div>
                               </div>
                           </td>
@@ -487,14 +499,14 @@
                                 class="fas fa-edit text-secondary text-sm user-select-none p-2"
                                 data-bs-toggle="modal"
                                 data-bs-target="#editModal{{ dtr.id }}"
-                              >
+                              >Edit
                               </i>
                               <i
                                 type="button"
                                 class="fas fa-trash-alt text-danger text-sm user-select-none"
                                 data-bs-toggle="modal"
                                 data-bs-target="#deleteModal{{ dtr.id }}"
-                              >
+                              >Delete
                               </i>
                               </i>
                           </td>

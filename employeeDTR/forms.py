@@ -16,6 +16,7 @@ class DTRForm(forms.ModelForm):
         }
 
 class EmployeeForm(forms.ModelForm):
+    employee_id=forms.IntegerField(required=True)
     class Meta:
         model = Employee
         fields = ['employee_id','first_name', 'last_name', 'email', 'dob', 'address', 'department', 'position', 'hourly_rate', 'Overtime_rate', 'employee_type', 'date_hired', 'status']

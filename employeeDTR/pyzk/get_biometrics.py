@@ -19,6 +19,8 @@ def capture_biometric():
         for attendance in conn.live_capture():
             if attendance is None:
                 # implement here timeout logic
+                conn.end_live_capture = True
+                capture_biometric()
                 pass
             else:
                 print('ATTENDANCE', attendance)

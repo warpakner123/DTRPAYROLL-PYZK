@@ -476,6 +476,11 @@
                 <thead class="align-items-left">
                   <tr>
                     <th
+                    class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                  >
+                    Employee ID
+                  </th>
+                    <th
                       class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                     >
                       Employee
@@ -499,11 +504,6 @@
                     <th
                       class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                     >
-                      Have Account
-                    </th>
-                    <th
-                      class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                    >
                       Status
                     </th>
                     <th
@@ -516,6 +516,9 @@
                 <tbody>
                   {% for employee in employees %}
                   <tr>
+                    <td class="align-middle text-sm mb-0">
+                      {{employee.employee_id}}
+                    </td>
                     <td class="align-middle">
                       <div class="d-flex px-2 py-1">
                         <div>
@@ -545,9 +548,6 @@
                       {{employee.employee_type}}
                     </td>
                     <td class="align-middle text-sm mb-0">
-                      {{employee.date_hired}}
-                    </td>
-                    <td class="align-middle text-sm mb-0">
                       {{employee.employee_type}}
                     </td>
                     <td class="align-middle text-sm">
@@ -567,19 +567,22 @@
                             class="fas fa-eye text-primary text-sm user-select-none p-2"
                             data-bs-toggle="modal"
                             data-bs-target="#viewModal{{ employee.id }}"
-                        ></i>
+                        >View</i>
                         <i
                           type="button"
                           class="fas fa-edit text-secondary text-sm user-select-none p-2"
                           data-bs-toggle="modal"
                           data-bs-target="#editModal{{ employee.id }}"
-                        ></i>
+                        >Edit</i>
+                        <!-- DELETE EMPLOYEE BUTTON
                         <i
                             type="button"
                             class="fas fa-trash-alt text-danger text-sm user-select-none"
                             data-bs-toggle="modal"
                             data-bs-target="#deleteModal{{ employee.id }}"
-                        ></i>
+                        >Delete</i>
+                        -->
+                        
                     </td>
                   </tr>
                   {% endfor %}
@@ -710,6 +713,7 @@
                         value="{{ employee.employee_id }}"
                         required
                         min="1"
+                        disabled
                     />
                 </div>
                 <div class="col-4">

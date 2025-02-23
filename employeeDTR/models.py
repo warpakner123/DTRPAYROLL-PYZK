@@ -35,7 +35,6 @@ class Benefits(models.Model):
 
 class Employee(models.Model):
     STATUS_CHOICES = [
-        (2,'OPSSSIEEE'),
         (1, "Active"),
         (0, "Inactive"),
     ]
@@ -57,7 +56,7 @@ class Employee(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE, null=True, blank=True)
     hourly_rate = models.FloatField(default=0.0)
     Overtime_rate = models.FloatField(default=0.0)
-    employee_type = models.CharField(max_length=100, choices=EMP_TYPE_CHOICES, default="Part-Time")
+    employee_type = models.CharField(max_length=100, choices=EMP_TYPE_CHOICES, default="Full-Time")
     email = models.EmailField(max_length=255)
     sample_loans=models.ManyToManyField(LoansTaxes,related_name="employee", through="Deductions")
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)

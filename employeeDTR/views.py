@@ -30,6 +30,9 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from employeeDTR.pyzk.register_biometric import register_fingerprint
 from employeeDTR.pyzk.get_biometrics import capture_biometric
+from employeeDTR.pyzk.restart_device import restart_device
+from employeeDTR.pyzk.delete_user import delete_user_fingerprint
+from zk.exception import ZKNetworkError
 
 # from django.shortcuts import render
 # from django.http import HttpResponse
@@ -317,6 +320,18 @@ def attendance(request):
             capture_biometric()
             return redirect('attendance')
 
+        elif 'restart_device' in request.POST:
+            try:
+                restart_device()
+            except ZKNetworkError as e:
+                print(f"Device restart timed out: {e}")
+            except Exception as e:
+                # Catch any other exceptions to prevent 500 errors
+                print(f"Unexpected error restarting device: {e}")
+            
+            return redirect('attendance')
+            
+
     else:
         # Rendering the attendance page
         form = UploadFileForm()
@@ -424,101 +439,131 @@ def logout_user(request):
     logout(request)
     return redirect('custom_login')
 
+
 def profile(request):
     if request.method == 'POST':
         if 'edit_employee' in request.POST:
-            form = EmployeeForm(request.POST)
+            id = request.POST.get('id')
+            employee = get_object_or_404(Employee, id=id)
+
+            form = EmployeeForm(request.POST, instance=employee)
+
             if form.is_valid():
-                id = request.POST.get('id')
-                employee_id = request.POST.get('employee_id')
-                employee = get_object_or_404(Employee, id=id)
-                # Check if the employee_id has been changed
+                try:
+                    employee_id = int(request.POST.get('employee_id'))  # Convert to integer
+                except ValueError:
+                    messages.error(request, "Invalid Employee ID format.")
+                    return redirect('profile')
+
+                # Check if the employee_id has changed and ensure uniqueness
                 if employee.employee_id != employee_id:
-                    # Check if an employee with the same employee_id already exists
                     existing_employee = Employee.objects.filter(employee_id=employee_id).exclude(id=id).first()
                     if existing_employee:
-                        return HttpResponseBadRequest("Employee with this ID already exists!")
-                form = EmployeeForm(request.POST, instance=employee)
-                if form.is_valid():
-                    # register_fingerprint(id, employee.first_name, '123')
-                    form.save()
-                    # Update deductions
-                    deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
-                    employee.sample_loans.clear()  # Clear existing deductions
-                    for deduction_id in deduction_ids:
-                        deduction = LoansTaxes.objects.get(id=deduction_id)
-                        Deductions.objects.create(employee=employee, loanTaxes=deduction)
-                    messages.success(request, 'Employee details updated successfully!')
-                    return redirect('profile')
+                        messages.error(request, "Employee with this ID already exists!")
+                        return redirect('profile')
+
+                # Save the form but explicitly set employee_id
+                employee = form.save(commit=False)
+                employee.employee_id = employee_id  # Ensure correct assignment
+                employee.save()
+
+                # Update deductions
+                deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
+                employee.sample_loans.clear()
+                for deduction_id in deduction_ids:
+                    deduction = LoansTaxes.objects.get(id=deduction_id)
+                    Deductions.objects.create(employee=employee, loanTaxes=deduction)
+
+                messages.success(request, 'Employee details updated successfully!')
+                return redirect('profile')
+
+            else:
+                messages.error(request, 'Failed to update employee. Please check your input.')
+                return redirect('profile') # Ensure a response is returned
+
+
         elif 'delete_employee' in request.POST:
             id = request.POST.get('id')
             employee = get_object_or_404(Employee, id=id)
+            #delete_user_fingerprint(id)
             employee.delete()
             messages.success(request, 'Employee successfully removed!')
             return redirect('profile')
+
         elif 'add_employee' in request.POST:
             employee_id = request.POST.get('employee_id')
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
+            try:
+                employee_id = int(employee_id)  # Convert to integer
+            except ValueError:
+                messages.error(request, "Invalid Employee ID!")
+                return redirect('profile')
 
-            # Check if an employee with the same employee_id already exists
+            # Check if employee_id is unique
             if Employee.objects.filter(employee_id=employee_id).exists():
-                return HttpResponseBadRequest("Employee with this ID already exists!")
+                messages.error(request, "Employee with this ID already exists!")
+                return redirect('profile')
 
-            # Check if an employee with the same first name and last name already exists
+            # Check if employee name already exists
             if Employee.objects.filter(first_name=first_name, last_name=last_name).exists():
-                return HttpResponseBadRequest("Employee with this name already exists!")
+                messages.error(request, "Employee with this name already exists!")
+                return redirect('profile')
 
-            form = AddEmployeeForm(request.POST)  # Instantiate the AddEmployeeForm with POST data
-            if form.is_valid():  # Validate the form
-                # HERE HERE
-                employee = form.save()   # Save the form data to the database
-                employeeid = employee.id 
-           
+            form = AddEmployeeForm(request.POST)
+            if form.is_valid():
+                employee = form.save(commit=False)
+                employeeid = employee_id              
                 register_fingerprint(employeeid, first_name, '123')
-                # deductions_data = request.POST.getlist('deductions')  # Get the list of deductions from the form
-                deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
+                employee = form.save()
 
+                # Add deductions
+                deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
                 for deduction_id in deduction_ids:
-                    deduction = LoansTaxes.objects.get(id=deduction_id)  # Retrieve the deduction object from the database
-                    Deductions.objects.create(employee=employee, loanTaxes=deduction)  # Create Deductions object
-                messages.success(request, 'Employee successfully added!')  # Success message
-                return redirect('profile')  # Redirect to the profile page
+                    deduction = LoansTaxes.objects.get(id=deduction_id)
+                    Deductions.objects.create(employee=employee, loanTaxes=deduction)
+
+                messages.success(request, 'Employee successfully added!')
+                return redirect('profile')
             else:
-                pass
+                messages.error(request, 'Failed to add employee. Please check your input.')
+                return redirect('profile')  # Ensure we return something
+
         elif 'register_finger_print' in request.POST:
             id = request.POST.get('id')
             employee = get_object_or_404(Employee, id=id)
             register_fingerprint(id, employee.first_name, '123')
+            messages.success(request, 'Fingerprint registered successfully!')
             return redirect('profile')
-    else:
-        employees = Employee.objects.exclude(department__department_name__iexact='hr')
-        departments = Department.objects.exclude(department_name__iexact='hr')
-        positions = Position.objects.exclude(position__iexact='hr')
-        loans_taxes = LoansTaxes.objects.all()
 
-        for employee in employees:
-            employee.full_name = f"{employee.first_name} {employee.last_name}".title()
-            employee.department.department_name = employee.department.department_name.title()
-            employee.position.position = employee.position.position.title()
-            employee.deduction_ids = set(employee.sample_loans.values_list('id', flat=True))  # Add this line
+    # Handle GET request
+    employees = Employee.objects.exclude(department__department_name__iexact='hr')
+    departments = Department.objects.exclude(department_name__iexact='hr')
+    positions = Position.objects.exclude(position__iexact='hr')
+    loans_taxes = LoansTaxes.objects.all()
 
-        for position in positions:
-            position.position = position.position.title()
+    for employee in employees:
+        employee.full_name = f"{employee.first_name} {employee.last_name}".title()
+        employee.department.department_name = employee.department.department_name.title()
+        employee.position.position = employee.position.position.title()
+        employee.deduction_ids = set(employee.sample_loans.values_list('id', flat=True))
 
-        for department in departments:
-            department.department_name = department.department_name.title()
+    for position in positions:
+        position.position = position.position.title()
 
-        for loan_tax in loans_taxes:
-            loan_tax.name = loan_tax.name.title()
+    for department in departments:
+        department.department_name = department.department_name.title()
 
-        context = {
-            'employees': employees,
-            'departments': departments,
-            'positions': positions,
-            'loans_taxes': loans_taxes,
-        }
-        return render(request, 'profile.html', context)
+    for loan_tax in loans_taxes:
+        loan_tax.name = loan_tax.name.title()
+
+    context = {
+        'employees': employees,
+        'departments': departments,
+        'positions': positions,
+        'loans_taxes': loans_taxes,
+    }
+    return render(request, 'profile.html', context)
 
 def department(request):
     if request.method == 'POST':
