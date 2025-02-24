@@ -9,17 +9,20 @@ class UploadFileForm(forms.Form):
 class DTRForm(forms.ModelForm):
     class Meta:
         model = DTR
-        fields = ['datetime', 'status']
+        fields = ['status']
         widgets = {
-            'datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'status': forms.Select(choices=[('C/In', 'Check-in'), ('C/Out', 'Check-out')]),
         }
-
+        #fields = ['datetime', 'status']
+        # widgets = {
+        #             'datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        #             'status': forms.Select(choices=[('C/In', 'Check-in'), ('C/Out', 'Check-out')]),
+        #         }
 class EmployeeForm(forms.ModelForm):
     employee_id=forms.IntegerField(required=True)
     class Meta:
         model = Employee
-        fields = ['employee_id','first_name', 'last_name', 'email', 'dob', 'address', 'department', 'position', 'hourly_rate', 'Overtime_rate', 'employee_type', 'date_hired', 'status']
+        fields = ['first_name', 'last_name', 'email', 'dob', 'address', 'department', 'position', 'hourly_rate', 'Overtime_rate', 'employee_type', 'date_hired', 'status']
         widgets = {
             'dob': forms.DateInput(attrs={'type': 'date'}),
             'date_hired': forms.DateInput(attrs={'type': 'date'}),
@@ -33,7 +36,7 @@ class EmployeeForm(forms.ModelForm):
 class AddEmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = ['employee_id', 'first_name', 'last_name', 'email', 'dob', 'address', 'department', 'position', 'hourly_rate', 'Overtime_rate', 'employee_type', 'date_hired']
+        fields = ['first_name', 'last_name', 'email', 'dob', 'address', 'department', 'position', 'hourly_rate', 'Overtime_rate', 'employee_type', 'date_hired']
         widgets = {
             'dob': forms.DateInput(attrs={'type': 'date'}),
             'date_hired': forms.DateInput(attrs={'type': 'date'}),
@@ -43,3 +46,8 @@ class AddEmployeeForm(forms.ModelForm):
             'Overtime_rate': forms.NumberInput(attrs={'step': '0.01'}),
             'employee_type': forms.Select(attrs={'class': 'form-control mb-3', 'required': True}),
         }
+    employee_id = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}), required=False)
+    def __init__(self, *args, **kwargs):
+        super(AddEmployeeForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.id:
+            self.fields['employee_id'].initial = self.instance.id

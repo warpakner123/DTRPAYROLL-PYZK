@@ -45,7 +45,7 @@ class Employee(models.Model):
         ("Flex-Time", "Flex-Time"),
         ("Project-Based", "Project-Based"),
     ]
-    employee_id = models.IntegerField(null=True)
+    employee_id = models.IntegerField(unique=True, editable=False, null=True)  # Auto-increment
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
@@ -60,6 +60,12 @@ class Employee(models.Model):
     email = models.EmailField(max_length=255)
     sample_loans=models.ManyToManyField(LoansTaxes,related_name="employee", through="Deductions")
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if self.employee_id is None:  # Auto-assign employee_id if it's missing
+            last_employee = Employee.objects.order_by('-employee_id').first()
+            self.employee_id = (last_employee.employee_id + 1) if last_employee else 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

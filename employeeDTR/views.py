@@ -33,6 +33,8 @@ from employeeDTR.pyzk.get_biometrics import capture_biometric
 from employeeDTR.pyzk.restart_device import restart_device
 from employeeDTR.pyzk.delete_user import delete_user_fingerprint
 from zk.exception import ZKNetworkError
+from django.utils.timezone import localtime  # Ensures correct timezone handling
+
 
 # from django.shortcuts import render
 # from django.http import HttpResponse
@@ -443,43 +445,40 @@ def logout_user(request):
 def profile(request):
     if request.method == 'POST':
         if 'edit_employee' in request.POST:
-            id = request.POST.get('id')
-            employee = get_object_or_404(Employee, id=id)
-
-            form = EmployeeForm(request.POST, instance=employee)
-
+            form = EmployeeForm(request.POST)
             if form.is_valid():
-                try:
-                    employee_id = int(request.POST.get('employee_id'))  # Convert to integer
-                except ValueError:
-                    messages.error(request, "Invalid Employee ID format.")
-                    return redirect('profile')
+                id = request.POST.get('id')
+                employee_id = request.POST.get('employee_id')
+                employee = get_object_or_404(Employee, id=id)
 
-                # Check if the employee_id has changed and ensure uniqueness
+                # Check if the employee_id has been changed
                 if employee.employee_id != employee_id:
+                    # Check if an employee with the same employee_id already exists
                     existing_employee = Employee.objects.filter(employee_id=employee_id).exclude(id=id).first()
                     if existing_employee:
-                        messages.error(request, "Employee with this ID already exists!")
-                        return redirect('profile')
+                        return HttpResponseBadRequest("Employee with this ID already exists!")
 
-                # Save the form but explicitly set employee_id
-                employee = form.save(commit=False)
-                employee.employee_id = employee_id  # Ensure correct assignment
-                employee.save()
+                    # Assign the new employee_id manually
+                    employee.employee_id = employee_id
 
-                # Update deductions
-                deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
-                employee.sample_loans.clear()
-                for deduction_id in deduction_ids:
-                    deduction = LoansTaxes.objects.get(id=deduction_id)
-                    Deductions.objects.create(employee=employee, loanTaxes=deduction)
+                # Save other form data
+                form = EmployeeForm(request.POST, instance=employee)
+                if form.is_valid():
+                    form.save()
 
-                messages.success(request, 'Employee details updated successfully!')
-                return redirect('profile')
+                    # Update deductions
+                    deduction_ids = [value for key, value in request.POST.items() if key.startswith('loan_tax_')]
+                    employee.sample_loans.clear()  # Clear existing deductions
+                    for deduction_id in deduction_ids:
+                        deduction = LoansTaxes.objects.get(id=deduction_id)
+                        Deductions.objects.create(employee=employee, loanTaxes=deduction)
+
+                    messages.success(request, 'Employee details updated successfully!')
+                    return redirect('profile')
 
             else:
-                messages.error(request, 'Failed to update employee. Please check your input.')
-                return redirect('profile') # Ensure a response is returned
+                print(form.errors)  # Debugging: Print form errors to check validation issues
+                return HttpResponseBadRequest("Invalid form submission.")
 
 
         elif 'delete_employee' in request.POST:
@@ -491,19 +490,9 @@ def profile(request):
             return redirect('profile')
 
         elif 'add_employee' in request.POST:
-            employee_id = request.POST.get('employee_id')
+            employee_id = None
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
-            try:
-                employee_id = int(employee_id)  # Convert to integer
-            except ValueError:
-                messages.error(request, "Invalid Employee ID!")
-                return redirect('profile')
-
-            # Check if employee_id is unique
-            if Employee.objects.filter(employee_id=employee_id).exists():
-                messages.error(request, "Employee with this ID already exists!")
-                return redirect('profile')
 
             # Check if employee name already exists
             if Employee.objects.filter(first_name=first_name, last_name=last_name).exists():
@@ -513,8 +502,8 @@ def profile(request):
             form = AddEmployeeForm(request.POST)
             if form.is_valid():
                 employee = form.save(commit=False)
-                employeeid = employee_id              
-                register_fingerprint(employeeid, first_name, '123')
+                employee_id = employee.id       
+                #register_fingerprint(employee_id, first_name, '123')
                 employee = form.save()
 
                 # Add deductions
@@ -562,6 +551,7 @@ def profile(request):
         'departments': departments,
         'positions': positions,
         'loans_taxes': loans_taxes,
+        'employee_id': employee_id if 'employee_id' in locals() else None,
     }
     return render(request, 'profile.html', context)
 

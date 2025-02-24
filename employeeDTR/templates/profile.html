@@ -247,6 +247,7 @@
             <form method="post" id="employee_form">
               {% csrf_token %}
               <div class="modal-body">
+                <!--
                 <div class="form-group">
                   <label for="employee_id" class="col-form-label">Employee ID:</label>
                   <input
@@ -255,8 +256,10 @@
                     id="employee_id"
                     name="employee_id"
                     min="1"
-                    required
+                    value=" {{ employee_id }}"
+                    readonly
                   />
+                  -->
                 </div>
                 <div class="form-group row">
                   <div class="col-6">
@@ -295,6 +298,7 @@
                       required
                     />
                   </div>
+                  <!-- FILTER DOB -->
                   <div class="col-6">
                     <label for="dob" class="col-form-label">Date of Birth:</label>
                     <input
@@ -302,7 +306,8 @@
                       class="form-control"
                       id="dob"
                       name="dob"
-                      required
+                      required 
+                      max=""
                     />
                   </div>
                 </div>
@@ -548,7 +553,7 @@
                       {{employee.employee_type}}
                     </td>
                     <td class="align-middle text-sm mb-0">
-                      {{employee.employee_type}}
+                      {{employee.date_hired}}
                     </td>
                     <td class="align-middle text-sm">
                       {% if employee.status == 1 %}
@@ -703,6 +708,7 @@
           <input type="hidden" name="id" value="{{ employee.id }}">
           <input type="hidden" name="employee_id" value="{{ employee.employee_id }}">
             <div class="form-group row">
+              <!-- EDITABLE EMPLOYEE ID-->
                 <div class="col-2">
                     <label for="employee_id" class="col-form-label">Employee ID:</label>
                     <input
@@ -714,7 +720,9 @@
                         required
                         min="1"
                         disabled
+                        
                     />
+                  
                 </div>
                 <div class="col-4">
                     <label for="status" class="col-form-label">Active Status:</label>
@@ -789,6 +797,7 @@
                   name="dob"
                   value="{{ employee.dob|date:'Y-m-d' }}"
                   required
+                  max=""
               />
           </div>
       </div>
@@ -1180,6 +1189,15 @@
         </div>
       </div>
 {% endfor %}
+
+<script>
+  // FILTER DOB
+  document.addEventListener("DOMContentLoaded", function() {
+        let today = new Date();
+        let maxDate = new Date(today.setFullYear(today.getFullYear() - 18)).toISOString().split("T")[0];
+        document.getElementById("dob").setAttribute("max", maxDate);
+    });
+</script>
 
 <script>
 // Reset form fields when modal is shown

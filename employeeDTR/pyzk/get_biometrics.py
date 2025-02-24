@@ -49,6 +49,7 @@ def capture_biometric():
                         print('attendance + 5 mins:', emp_attendance.datetime + timedelta(minutes=5))
                         print('attendance.timestamp:', attendance.timestamp)
                         last_timestamp=emp_attendance.datetime
+                        # MINUTES OF INTERVAL  // IN & OUT
                         five_min_after_last=last_timestamp+timedelta(minutes=5)
                         current_timestamp=timezone.now()
                         
