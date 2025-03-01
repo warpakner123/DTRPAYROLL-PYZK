@@ -31,7 +31,6 @@ from xhtml2pdf import pisa
 from employeeDTR.pyzk.register_biometric import register_fingerprint
 from employeeDTR.pyzk.get_biometrics import capture_biometric
 from employeeDTR.pyzk.restart_device import restart_device
-from employeeDTR.pyzk.delete_user import delete_user_fingerprint
 from zk.exception import ZKNetworkError
 from django.utils.timezone import localtime  # Ensures correct timezone handling
 

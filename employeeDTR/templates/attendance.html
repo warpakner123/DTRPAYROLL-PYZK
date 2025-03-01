@@ -335,10 +335,18 @@
               >
                  {% csrf_token %}
                 <div class="d-flex align-items-center">
+                  <div id="fingerprintModal" 
+                  style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                         background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; border-radius: 8px; 
+                         text-align: center; font-size: 18px; z-index: 1000;">
+                  Live Capture <br>
+                  Starts in <span id="countdown">5</span> seconds...
+              </div>
                     <button
                       type="submit"
                       name="live_capture"
                       class="btn btn-success btn-lg ml-3"
+                      onclick="showLiveCaptureMessage()"
                     >
                       Live Capture
                     </button>
@@ -638,8 +646,9 @@
                         <h6>Current Date-Time for Employee : {{dtr.employee.full_name}}</h6>
                         <h6>{{dtr.datetime}}</h6>
                         <input type="hidden" name="dtr_id" value="{{ dtr.id }}">
+                      <!--
                         <div class="form-group">
-                          <!--
+                          
                             <label for="datetime" class="col-form-label">Date and Time:</label>
                             <input
                                 type="datetime-local"
@@ -649,8 +658,9 @@
                                 value="{{ dtr.datetime }}"
                                 required
                             />
-                        -->
-                        </div>
+                      
+                        </div>-->
+
                         <div class="form-group">
                             <label for="status" class="col-form-label">Type:</label>
                             <select
@@ -786,4 +796,25 @@
           </div>
       </div>
   </div>
+
+  <script>
+    function showLiveCaptureMessage() {
+        let modal = document.getElementById("fingerprintModal");
+        let countdown = document.getElementById("countdown");
+        let timeLeft = 5; // Start countdown from 5
+
+        modal.style.display = "block"; // Show modal
+        countdown.innerText = timeLeft; // Set initial countdown value
+
+        let timer = setInterval(() => {
+            timeLeft--; // Decrease time
+            countdown.innerText = timeLeft; // Update countdown text
+
+            if (timeLeft <= 0) {
+                clearInterval(timer); // Stop timer when it reaches 0
+                modal.style.display = "none"; // Hide modal
+            }
+        }, 1000); // Update every second
+    }
+</script>
 </html>

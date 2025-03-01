@@ -247,7 +247,7 @@
             <form method="post" id="employee_form">
               {% csrf_token %}
               <div class="modal-body">
-                <!--
+               
                 <div class="form-group">
                   <label for="employee_id" class="col-form-label">Employee ID:</label>
                   <input
@@ -258,8 +258,9 @@
                     min="1"
                     value=" {{ employee_id }}"
                     readonly
+                    placeholder="DO NOT FILL IN"
                   />
-                  -->
+                  
                 </div>
                 <div class="form-group row">
                   <div class="col-6">
@@ -744,10 +745,17 @@
                   <div class="col-4 mt-4">
                       {% csrf_token %}
                       <input type="hidden" name="employee_id" value="{{ employee.id }}">
+                      <div id="fingerprintModal" 
+                      style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                             background-color: rgba(0, 0, 0, 0.8); color: white; padding: 20px; border-radius: 8px; 
+                             text-align: center; font-size: 18px; z-index: 1000;">
+                      Registering Fingerprint. Please wait...
+                      </div>
                       <button
                         class="btn bg-gradient-primary mt-3"
                         type="submit"
                         name="register_finger_print"
+                        onclick="showFingerprintMessage()"
                       >
                         Register Finger Print
                       </button>
@@ -1230,5 +1238,15 @@ document.addEventListener('DOMContentLoaded', function () {
     <script>
         new DataTable('#employeeTable');
     </script>
+        <script>
+          function showFingerprintMessage() {
+              let modal = document.getElementById("fingerprintModal");
+              modal.style.display = "block"; // Show modal
+  
+              setTimeout(() => {
+                  modal.style.display = "none"; // Hide modal after 2 minutes (120,000 ms)
+              }, 120000);
+          }
+      </script>
 
 </html>
